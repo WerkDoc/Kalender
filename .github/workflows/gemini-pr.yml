@@ -1,0 +1,57 @@
+name: Gemini PR Assistant
+
+on:
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  build-pr:
+    if: >
+      github.actor == github.repository_owner &&
+      (
+        github.event_name == 'issues' ||
+        (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@gemini'))
+      )
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository auschecken
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Git konfigurieren
+        run: |
+          git config user.name "Gemini Bot"
+          git config user.email "gemini-bot@users.noreply.github.com"
+
+      - name: Gemini CLI ausfuehren & PR erstellen
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          npx -y @google/gemini-cli -y -p "
+          Du bist ein erfahrener App-Entwickler und arbeitest an diesem GitHub-Repository.
+          Aufgabe aus Issue #${ISSUE_NUMBER} (${ISSUE_TITLE}):
+          Beschreibung: ${ISSUE_BODY}
+          Zusatz-Kommentar: ${COMMENT_BODY}
+
+          Fuehre folgende Schritte selbstaendig aus:
+          1. Erstelle einen neuen Git-Branch (z. B. feat/issue-${ISSUE_NUMBER}) ausgehend vom aktuellen Standard-Branch.
+          2. Analysiere den bestehenden Code im Repository und setze die gewuenschte Aenderung sauber und vollstaendig um.
+          3. Pruefe deine Aenderungen auf Syntax- oder Logikfehler.
+          4. Committe alle Aenderungen mit einer klaren Commit-Nachricht und pushe den Branch zu origin.
+          5. Erstelle ueber die GitHub CLI (gh pr create) einen Pull Request in den Standard-Branch mit einer kurzen Zusammenfassung auf Deutsch und verlinke 'Closes #${ISSUE_NUMBER}'.
+          6. Kommentiere anschliessend kurz unter Issue #${ISSUE_NUMBER} (via gh issue comment), dass der Pull Request bereitsteht.
+          "
