@@ -43,8 +43,8 @@ jobs:
           COMMENT_BODY: ${{ github.event.comment.body }}
         run: |
           for attempt in 1 2 3; do
-            echo "Starte Versuch $attempt mit gemini-2.5-flash..."
-            if npx -y @google/gemini-cli -m gemini-2.5-flash --skip-trust -y -p "
+            echo "Starte Versuch $attempt..."
+            if npx -y @google/gemini-cli --skip-trust -y -p "
             Du bist ein erfahrener App-Entwickler und arbeitest an diesem GitHub-Repository.
             Aufgabe aus Issue #${ISSUE_NUMBER} (${ISSUE_TITLE}):
             Beschreibung: ${ISSUE_BODY}
@@ -57,10 +57,15 @@ jobs:
             4. Committe alle Aenderungen mit einer klaren Commit-Nachricht und pushe den Branch zu origin.
             5. Erstelle ueber die GitHub CLI (gh pr create) einen Pull Request in den Standard-Branch mit einer kurzen Zusammenfassung auf Deutsch und verlinke 'Closes #${ISSUE_NUMBER}'.
             6. Kommentiere anschliessend kurz unter Issue #${ISSUE_NUMBER} (via gh issue comment), dass der Pull Request bereitsteht.
-            "; then
+            " > gemini.log 2>&1; then
               exit 0
             fi
-            echo "Versuch $attempt fehlgeschlagen – warte 15 Sekunden..."
-            sleep 15
+            sleep 20
           done
+
+          ERROR_TAIL=$(tail -n 15 gemini.log)
+          gh issue comment "$ISSUE_NUMBER" --body "❌ **Gemini Fehler nach 3 Versuchen:**
+          \`\`\`
+          $ERROR_TAIL
+          \`\`\`"
           exit 1
