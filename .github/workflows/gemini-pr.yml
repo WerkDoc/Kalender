@@ -43,8 +43,8 @@ jobs:
           COMMENT_BODY: ${{ github.event.comment.body }}
         run: |
           for attempt in 1 2 3; do
-            echo "Starte Versuch $attempt..."
-            if npx -y @google/gemini-cli --skip-trust -y -p "
+            echo "Starte Versuch $attempt mit gemini-2.5-flash..."
+            if npx -y @google/gemini-cli -m gemini-2.5-flash --skip-trust -y -p "
             Du bist ein erfahrener App-Entwickler und arbeitest an diesem GitHub-Repository.
             Aufgabe aus Issue #${ISSUE_NUMBER} (${ISSUE_TITLE}):
             Beschreibung: ${ISSUE_BODY}
@@ -60,8 +60,7 @@ jobs:
             "; then
               exit 0
             fi
-            echo "Server ausgelastet – warte 20 Sekunden vor dem naechsten Versuch..."
-            sleep 20
+            echo "Versuch $attempt fehlgeschlagen – warte 15 Sekunden..."
+            sleep 15
           done
           exit 1
-          "
