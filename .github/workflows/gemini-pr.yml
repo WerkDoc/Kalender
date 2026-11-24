@@ -35,13 +35,14 @@ jobs:
       - name: Gemini CLI ausfuehren & PR erstellen
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_CLI_TRUST_WORKSPACE: "true"
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           ISSUE_TITLE: ${{ github.event.issue.title }}
           ISSUE_BODY: ${{ github.event.issue.body }}
           COMMENT_BODY: ${{ github.event.comment.body }}
         run: |
-          npx -y @google/gemini-cli -y -p "
+          npx -y @google/gemini-cli --skip-trust -y -p "
           Du bist ein erfahrener App-Entwickler und arbeitest an diesem GitHub-Repository.
           Aufgabe aus Issue #${ISSUE_NUMBER} (${ISSUE_TITLE}):
           Beschreibung: ${ISSUE_BODY}
