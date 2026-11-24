@@ -42,17 +42,26 @@ jobs:
           ISSUE_BODY: ${{ github.event.issue.body }}
           COMMENT_BODY: ${{ github.event.comment.body }}
         run: |
-          npx -y @google/gemini-cli --skip-trust -y -p "
-          Du bist ein erfahrener App-Entwickler und arbeitest an diesem GitHub-Repository.
-          Aufgabe aus Issue #${ISSUE_NUMBER} (${ISSUE_TITLE}):
-          Beschreibung: ${ISSUE_BODY}
-          Zusatz-Kommentar: ${COMMENT_BODY}
+          for attempt in 1 2 3; do
+            echo "Starte Versuch $attempt..."
+            if npx -y @google/gemini-cli --skip-trust -y -p "
+            Du bist ein erfahrener App-Entwickler und arbeitest an diesem GitHub-Repository.
+            Aufgabe aus Issue #${ISSUE_NUMBER} (${ISSUE_TITLE}):
+            Beschreibung: ${ISSUE_BODY}
+            Zusatz-Kommentar: ${COMMENT_BODY}
 
-          Fuehre folgende Schritte selbstaendig aus:
-          1. Erstelle einen neuen Git-Branch (z. B. feat/issue-${ISSUE_NUMBER}) ausgehend vom aktuellen Standard-Branch.
-          2. Analysiere den bestehenden Code im Repository und setze die gewuenschte Aenderung sauber und vollstaendig um.
-          3. Pruefe deine Aenderungen auf Syntax- oder Logikfehler.
-          4. Committe alle Aenderungen mit einer klaren Commit-Nachricht und pushe den Branch zu origin.
-          5. Erstelle ueber die GitHub CLI (gh pr create) einen Pull Request in den Standard-Branch mit einer kurzen Zusammenfassung auf Deutsch und verlinke 'Closes #${ISSUE_NUMBER}'.
-          6. Kommentiere anschliessend kurz unter Issue #${ISSUE_NUMBER} (via gh issue comment), dass der Pull Request bereitsteht.
+            Fuehre folgende Schritte selbstaendig aus:
+            1. Erstelle einen neuen Git-Branch (z. B. feat/issue-${ISSUE_NUMBER}) ausgehend vom aktuellen Standard-Branch.
+            2. Analysiere den bestehenden Code im Repository und setze die gewuenschte Aenderung sauber und vollstaendig um.
+            3. Pruefe deine Aenderungen auf Syntax- oder Logikfehler.
+            4. Committe alle Aenderungen mit einer klaren Commit-Nachricht und pushe den Branch zu origin.
+            5. Erstelle ueber die GitHub CLI (gh pr create) einen Pull Request in den Standard-Branch mit einer kurzen Zusammenfassung auf Deutsch und verlinke 'Closes #${ISSUE_NUMBER}'.
+            6. Kommentiere anschliessend kurz unter Issue #${ISSUE_NUMBER} (via gh issue comment), dass der Pull Request bereitsteht.
+            "; then
+              exit 0
+            fi
+            echo "Server ausgelastet – warte 20 Sekunden vor dem naechsten Versuch..."
+            sleep 20
+          done
+          exit 1
           "
