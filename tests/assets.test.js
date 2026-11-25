@@ -123,3 +123,51 @@ test('CSS enforces uniform round stamper buttons and safe-area-inset-bottom', ()
   );
 });
 
+test('CSS positions top glass header with iOS safe-area-inset-top and scroll clearance', () => {
+  const css = fs.readFileSync('css/style.css', 'utf8');
+
+  // Verify .glass-header exists
+  assert.ok(css.includes('.glass-header'), '.glass-header rule must exist');
+
+  // Verify position: sticky and top: 0
+  assert.ok(
+    /\.glass-header\s*\{[\s\S]*?position:\s*sticky/.test(css),
+    '.glass-header must use position: sticky'
+  );
+  assert.ok(
+    /\.glass-header\s*\{[\s\S]*?top:\s*0/.test(css),
+    '.glass-header must have top: 0 to extend behind status bar'
+  );
+
+  // Verify safe-area-inset-top padding
+  assert.ok(
+    /\.glass-header\s*\{[\s\S]*?padding-top:\s*calc\(env\(safe-area-inset-top,\s*20px\)\s*\+\s*12px\)/.test(css),
+    '.glass-header must use padding-top: calc(env(safe-area-inset-top, 20px) + 12px)'
+  );
+
+  // Verify min-height includes safe-area-inset-top
+  assert.ok(
+    /\.glass-header\s*\{[\s\S]*?min-height:\s*calc\(var\(--header-height\)\s*\+\s*env\(safe-area-inset-top/.test(css),
+    '.glass-header must adapt min-height for safe-area-inset-top'
+  );
+
+  // Verify html scroll-padding-top for scroll clearance
+  assert.ok(
+    /html\s*\{[\s\S]*?scroll-padding-top:/.test(css),
+    'html must define scroll-padding-top to prevent sticky header occlusion'
+  );
+
+  // Verify round header action buttons
+  assert.ok(
+    /\.header-actions\s+\.glass-btn-icon\s*\{[\s\S]*?border-radius:\s*50%/.test(css),
+    '.header-actions .glass-btn-icon must have border-radius: 50%'
+  );
+
+  // Verify .app-main padding
+  assert.ok(
+    /\.app-main\s*\{[\s\S]*?padding:\s*14px/.test(css),
+    '.app-main must have adequate top padding'
+  );
+});
+
+
