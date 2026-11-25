@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Kalender & Schichtplaner</title>
+  <meta name="description" content="Moderne Kalender und Schichtplaner Progressive Web App mit Offline-Speicherung">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kalender">
+
+  <!-- PWA Manifest & Icons -->
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+  <link rel="apple-touch-icon" href="./icons/icon.svg">
+
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="ambient-glow ambient-glow-1"></div>
+  <div class="ambient-glow ambient-glow-2"></div>
+
+  <!-- Glassmorphism Top Header -->
+  <header class="glass-header">
+    <div class="app-branding">
+      <img src="./icons/icon.svg" alt="Kalender Logo" class="app-logo">
+      <div class="app-title-group">
+        <h1 class="app-title">SchichtKalender</h1>
+        <span class="app-subtitle">PWA • Offline aktiv</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="glass-btn glass-btn-icon" id="stamperToggleBtn" title="Schicht-Schnellstempel aktivieren">
+        <span>⚡</span>
+      </button>
+      <button class="glass-btn glass-btn-icon" id="themeToggleBtn" title="Design wechseln">
+        <span id="themeToggleIcon">☀️</span>
+      </button>
+      <button class="glass-btn glass-btn-icon" id="settingsBtn" title="Einstellungen & Datensicherung">
+        <span>⚙️</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="app-main" id="calendarContentArea">
+    <!-- Top Control Bar (Month/Day Switcher & Quick Navigation) -->
+    <div class="glass-card calendar-control-bar">
+      <div class="month-nav-group">
+        <button class="glass-btn glass-btn-icon" id="prevMonthBtn" title="Zurück">
+          <span>◀</span>
+        </button>
+        <button class="current-title-btn" id="currentTitleBtn" title="Monat / Jahr wählen">
+          <span id="currentTitleText">November 2026</span>
+          <span style="font-size: 11px; opacity: 0.6;">▼</span>
+        </button>
+        <button class="glass-btn glass-btn-icon" id="nextMonthBtn" title="Weiter">
+          <span>▶</span>
+        </button>
+        <button class="glass-btn glass-btn-sm" id="todayBtn" title="Zu Heute springen">
+          Heute
+        </button>
+      </div>
+
+      <div class="view-segment-control">
+        <button class="segment-btn active" data-view="month" title="Monatsansicht">
+          📅 Monat
+        </button>
+        <button class="segment-btn" data-view="day" title="Tagesansicht">
+          📋 Tag
+        </button>
+        <button class="segment-btn" data-view="search" title="Suche">
+          🔍 Suche
+        </button>
+      </div>
+    </div>
+
+    <!-- 1. MONTH VIEW -->
+    <section class="month-view-container" id="monthView">
+      <!-- Shift Monthly Statistics Strip -->
+      <div class="shift-stats-strip">
+        <div class="stat-pill stat-frueh" title="Frühschichten in diesem Monat">
+          <div class="stat-header"><span>☀️</span> Früh</div>
+          <div class="stat-count" id="statCountFrueh">0</div>
+        </div>
+        <div class="stat-pill stat-spaet" title="Spätschichten in diesem Monat">
+          <div class="stat-header"><span>🌅</span> Spät</div>
+          <div class="stat-count" id="statCountSpaet">0</div>
+        </div>
+        <div class="stat-pill stat-nacht" title="Nachtschichten in diesem Monat">
+          <div class="stat-header"><span>🌙</span> Nacht</div>
+          <div class="stat-count" id="statCountNacht">0</div>
+        </div>
+        <div class="stat-pill stat-urlaub" title="Urlaubstage in diesem Monat">
+          <div class="stat-header"><span>🌴</span> Urlaub</div>
+          <div class="stat-count" id="statCountUrlaub">0</div>
+        </div>
+      </div>
+
+      <!-- Month Grid with Weekday Headers -->
+      <div class="glass-card" style="padding: 12px 10px;">
+        <div class="weekdays-header-grid">
+          <div class="weekday-header-cell">Mo</div>
+          <div class="weekday-header-cell">Di</div>
+          <div class="weekday-header-cell">Mi</div>
+          <div class="weekday-header-cell">Do</div>
+          <div class="weekday-header-cell">Fr</div>
+          <div class="weekday-header-cell weekend">Sa</div>
+          <div class="weekday-header-cell weekend">So</div>
+        </div>
+
+        <div class="month-grid" id="monthGrid">
+          <!-- Calendar day cells dynamically populated by app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. DAY VIEW -->
+    <section class="day-view-container" id="dayView" style="display: none;">
+      <!-- Day Hero Card -->
+      <div class="glass-card day-hero-card">
+        <div class="day-hero-header">
+          <div>
+            <h2 class="day-hero-date-title" id="dayHeroTitle">Mittwoch, 25. November 2026</h2>
+            <span class="day-hero-subtitle" id="dayHeroSubtitle">Heute</span>
+          </div>
+          <div style="display: flex; gap: 6px;">
+            <button class="glass-btn glass-btn-icon" id="dayHeroPrevBtn" title="Vorheriger Tag">◀</button>
+            <button class="glass-btn glass-btn-sm" id="dayHeroTodayBtn" title="Heute">Heute</button>
+            <button class="glass-btn glass-btn-icon" id="dayHeroNextBtn" title="Nächster Tag">▶</button>
+          </div>
+        </div>
+
+        <!-- Shift Assignment for Selected Day -->
+        <div class="day-shift-card">
+          <div class="day-shift-header">
+            <div class="day-shift-status">
+              <span id="dayShiftName">☀️ Frühschicht</span>
+            </div>
+            <span class="day-shift-time" id="dayShiftTime">06:00 – 14:00</span>
+          </div>
+          <div class="shift-picker-chips">
+            <button class="shift-chip-btn chip-frueh" data-shift="frueh">☀️ Früh</button>
+            <button class="shift-chip-btn chip-spaet" data-shift="spaet">🌅 Spät</button>
+            <button class="shift-chip-btn chip-nacht" data-shift="nacht">🌙 Nacht</button>
+            <button class="shift-chip-btn chip-urlaub" data-shift="urlaub">🌴 Urlaub</button>
+            <button class="shift-chip-btn chip-frei" data-shift="frei">☕ Frei</button>
+            <button class="shift-chip-btn" data-shift="delete">❌ Keine</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Events on Day -->
+      <div class="day-events-section">
+        <div class="day-events-header">
+          <h3>Termine an diesem Tag</h3>
+          <button class="glass-btn glass-btn-sm glass-btn-primary" id="dayAddEventBtn">
+            <span>+</span> Neuer Termin
+          </button>
+        </div>
+
+        <div class="event-cards-list" id="dayEventCardsList">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. SEARCH & FILTER VIEW -->
+    <section class="search-view-container" id="searchView" style="display: none;">
+      <div class="search-input-wrapper">
+        <span class="search-icon-left">🔍</span>
+        <input type="text" class="search-input" id="searchInput" placeholder="Termine & Notizen durchsuchen...">
+        <button class="search-clear-btn" id="searchClearBtn" title="Suche leeren">✕</button>
+      </div>
+
+      <!-- Filter Rows -->
+      <div class="glass-card" style="padding: 14px; display: flex; flex-direction: column; gap: 12px;">
+        <div class="filters-scroll-row">
+          <span class="filter-group-label">Kategorie-Filter</span>
+          <div class="filter-chips-list">
+            <button class="filter-chip active" data-category-filter="all">Alle</button>
+            <button class="filter-chip" data-category-filter="arbeit">💼 Arbeit</button>
+            <button class="filter-chip" data-category-filter="privat">🏠 Privat</button>
+            <button class="filter-chip" data-category-filter="wichtig">⚠️ Wichtig</button>
+            <button class="filter-chip" data-category-filter="familie">👨‍👩‍👧 Familie</button>
+            <button class="filter-chip" data-category-filter="freizeit">🎉 Freizeit</button>
+            <button class="filter-chip" data-category-filter="gesundheit">🩺 Gesundheit</button>
+          </div>
+        </div>
+
+        <div class="filters-scroll-row">
+          <span class="filter-group-label">Schicht-Filter</span>
+          <div class="filter-chips-list">
+            <button class="filter-chip active" data-shift-filter="all">Alle Tage</button>
+            <button class="filter-chip" data-shift-filter="frueh">☀️ Frühschicht</button>
+            <button class="filter-chip" data-shift-filter="spaet">🌅 Spätschicht</button>
+            <button class="filter-chip" data-shift-filter="nacht">🌙 Nachtschicht</button>
+            <button class="filter-chip" data-shift-filter="urlaub">🌴 Urlaub</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="search-results-info" id="searchResultsCount">0 Termine gefunden</div>
+      <div class="event-cards-list" id="searchResultsList">
+        <!-- Results populated dynamically -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Shift Stamper Floating Bar (Rapid shift entry rota) -->
+  <aside class="shift-stamper-bar" id="shiftStamperBar">
+    <span class="stamper-label">Stempel:</span>
+    <div class="stamper-chips">
+      <button class="stamper-btn selected" data-shift="frueh" style="color: var(--shift-frueh-text);">☀️ F</button>
+      <button class="stamper-btn" data-shift="spaet" style="color: var(--shift-spaet-text);">🌅 S</button>
+      <button class="stamper-btn" data-shift="nacht" style="color: var(--shift-nacht-text);">🌙 N</button>
+      <button class="stamper-btn" data-shift="urlaub" style="color: var(--shift-urlaub-text);">🌴 U</button>
+      <button class="stamper-btn" data-shift="frei" style="color: var(--shift-frei-text);">☕ Frei</button>
+      <button class="stamper-btn" data-shift="delete" title="Schicht löschen">❌</button>
+    </div>
+    <button class="glass-btn glass-btn-icon glass-btn-sm" id="stamperCloseBtn" title="Stempelmodus beenden" style="margin-left: 4px;">✕</button>
+  </aside>
+
+  <!-- Bottom Mobile Navigation Bar -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-view="month">
+      <span class="nav-item-icon">📅</span>
+      <span>Monat</span>
+    </button>
+    <button class="nav-item" data-view="day">
+      <span class="nav-item-icon">📋</span>
+      <span>Tag</span>
+    </button>
+    <button class="nav-fab-btn" id="navFabBtn" title="Neuer Termin">
+      <span>+</span>
+    </button>
+    <button class="nav-item" data-view="search">
+      <span class="nav-item-icon">🔍</span>
+      <span>Suche</span>
+    </button>
+    <button class="nav-item" id="navSettingsBtn" onclick="document.getElementById('settingsBtn').click()">
+      <span class="nav-item-icon">⚙️</span>
+      <span>Setup</span>
+    </button>
+  </nav>
+
+  <!-- MODAL 1: ADD / EDIT EVENT -->
+  <div class="modal-backdrop" id="eventModalBackdrop">
+    <div class="modal-container">
+      <div class="modal-handle-bar"></div>
+      <div class="modal-header">
+        <h3 class="modal-title" id="eventModalTitle">Neuer Termin</h3>
+        <button class="glass-btn glass-btn-icon glass-btn-sm" id="eventModalCloseBtn">✕</button>
+      </div>
+
+      <form id="eventForm">
+        <div class="form-group">
+          <label class="form-label" for="eventTitleInput">Titel des Termins *</label>
+          <input type="text" id="eventTitleInput" class="form-input" placeholder="z. B. Arzttermin, Übergabe, Meeting" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="eventDateInput">Datum *</label>
+          <input type="date" id="eventDateInput" class="form-input" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-check-label">
+            <input type="checkbox" id="eventAllDayCheck" class="form-checkbox">
+            <span>Ganztägiger Termin</span>
+          </label>
+        </div>
+
+        <div class="form-row" id="eventTimeRow">
+          <div class="form-group">
+            <label class="form-label" for="eventStartTimeInput">Beginn</label>
+            <input type="time" id="eventStartTimeInput" class="form-input" value="09:00">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="eventEndTimeInput">Ende</label>
+            <input type="time" id="eventEndTimeInput" class="form-input" value="10:00">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Farbkategorie</label>
+          <div class="category-picker-grid">
+            <button type="button" class="category-choice-btn selected" data-category="privat" style="color: #10b981;">
+              <span class="category-dot" style="background: #10b981;"></span> Privat
+            </button>
+            <button type="button" class="category-choice-btn" data-category="arbeit" style="color: #3b82f6;">
+              <span class="category-dot" style="background: #3b82f6;"></span> Arbeit
+            </button>
+            <button type="button" class="category-choice-btn" data-category="wichtig" style="color: #ef4444;">
+              <span class="category-dot" style="background: #ef4444;"></span> Wichtig
+            </button>
+            <button type="button" class="category-choice-btn" data-category="familie" style="color: #f59e0b;">
+              <span class="category-dot" style="background: #f59e0b;"></span> Familie
+            </button>
+            <button type="button" class="category-choice-btn" data-category="freizeit" style="color: #a855f7;">
+              <span class="category-dot" style="background: #a855f7;"></span> Freizeit
+            </button>
+            <button type="button" class="category-choice-btn" data-category="gesundheit" style="color: #06b6d4;">
+              <span class="category-dot" style="background: #06b6d4;"></span> Gesundheit
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="eventNoteInput">Notiz / Details</label>
+          <textarea id="eventNoteInput" class="form-textarea" rows="3" placeholder="Zusätzliche Infos, Ort, Ansprechpartner..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="glass-btn" id="eventModalDeleteBtn" style="display: none; color: #f43f5e; margin-right: auto;">
+            🗑️ Löschen
+          </button>
+          <button type="button" class="glass-btn" id="eventModalCancelBtn">Abbrechen</button>
+          <button type="submit" class="glass-btn glass-btn-primary">Speichern</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: QUICK MONTH / YEAR PICKER -->
+  <div class="modal-backdrop" id="monthPickerModalBackdrop">
+    <div class="modal-container">
+      <div class="modal-handle-bar"></div>
+      <div class="modal-header">
+        <h3 class="modal-title">Monat & Jahr auswählen</h3>
+        <button class="glass-btn glass-btn-icon glass-btn-sm" id="monthPickerCloseBtn">✕</button>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="pickerMonthSelect">Monat</label>
+          <select id="pickerMonthSelect" class="form-select"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="pickerYearSelect">Jahr</label>
+          <select id="pickerYearSelect" class="form-select"></select>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="glass-btn glass-btn-primary" id="monthPickerApplyBtn">Anwenden</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: SETTINGS & BACKUP -->
+  <div class="modal-backdrop" id="settingsModalBackdrop">
+    <div class="modal-container">
+      <div class="modal-handle-bar"></div>
+      <div class="modal-header">
+        <h3 class="modal-title">Einstellungen & Sicherung</h3>
+        <button class="glass-btn glass-btn-icon glass-btn-sm" id="settingsCloseBtn">✕</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="glass-card" style="padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+          <h4 style="font-size: 14px; font-weight: 600;">💾 Datensicherung (localStorage)</h4>
+          <p style="font-size: 13px; color: var(--text-muted);">
+            Alle Termine und Schichten werden lokal im Browser gespeichert. Erstelle Sicherungen als JSON-Datei.
+          </p>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="button" class="glass-btn" id="exportBackupBtn">
+              📥 Backup exportieren (JSON)
+            </button>
+            <button type="button" class="glass-btn" id="importBackupBtn">
+              📤 Backup wiederherstellen
+            </button>
+            <input type="file" id="importFileInput" accept=".json" style="display: none;">
+          </div>
+        </div>
+
+        <div class="glass-card" style="padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+          <h4 style="font-size: 14px; font-weight: 600;">✨ Schichtplan Beispieldaten</h4>
+          <p style="font-size: 13px; color: var(--text-muted);">
+            Lade einen beispielhaften Schichtzyklus (Früh, Spät, Nacht, Urlaub) und Muster-Termine.
+          </p>
+          <button type="button" class="glass-btn" id="loadSampleDataBtn">
+            🌟 Beispieldaten laden
+          </button>
+        </div>
+
+        <div class="glass-card" style="padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+          <h4 style="font-size: 14px; font-weight: 600; color: #f43f5e;">⚠️ Gefahrenzone</h4>
+          <p style="font-size: 13px; color: var(--text-muted);">
+            Löscht alle gespeicherten Termine und Schichten aus dem Browser-Speicher.
+          </p>
+          <button type="button" class="glass-btn" id="clearAllDataBtn" style="color: #f43f5e; border-color: rgba(244, 63, 94, 0.4);">
+            🗑️ Alle Kalenderdaten löschen
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Application Entry Point -->
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+# Logs
+gemini.log
+*.log
+
+# Node & dependencies
+node_modules/
+package-lock.json
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
