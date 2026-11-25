@@ -49,3 +49,77 @@ test('index.html contains all IDs used by app.js', () => {
 
   assert.deepEqual(missingIds, [], `All IDs queried in app.js must exist in index.html`);
 });
+
+test('Shift stamper bar HTML has required elements, buttons and close button', () => {
+  const html = fs.readFileSync('index.html', 'utf8');
+
+  // Verify bar and close button
+  assert.ok(html.includes('id="shiftStamperBar"'), 'shiftStamperBar must exist');
+  assert.ok(html.includes('id="stamperCloseBtn"'), 'stamperCloseBtn must exist');
+  assert.ok(html.includes('class="stamper-close-btn"'), 'stamper-close-btn class must exist');
+
+  // Verify all 6 required buttons (F, S, N, U, Frei, delete)
+  const expectedShifts = ['frueh', 'spaet', 'nacht', 'urlaub', 'frei', 'delete'];
+  expectedShifts.forEach((shift) => {
+    assert.ok(
+      html.includes(`data-shift="${shift}"`),
+      `stamper button for shift "${shift}" must exist`
+    );
+  });
+});
+
+test('CSS enforces uniform round stamper buttons and safe-area-inset-bottom', () => {
+  const css = fs.readFileSync('css/style.css', 'utf8');
+
+  // Verify safe-area-inset-bottom usage for shift stamper and bottom nav
+  assert.ok(css.includes('.shift-stamper-bar'), '.shift-stamper-bar rule must exist');
+  assert.ok(
+    /\.shift-stamper-bar[\s\S]*?env\(safe-area-inset-bottom/.test(css),
+    '.shift-stamper-bar must respect safe-area-inset-bottom'
+  );
+  assert.ok(
+    /\.bottom-nav[\s\S]*?env\(safe-area-inset-bottom/.test(css),
+    '.bottom-nav must respect safe-area-inset-bottom'
+  );
+
+  // Verify stamper buttons uniform size and flexbox centering
+  assert.ok(
+    /\.stamper-btn\s*\{[\s\S]*?width:\s*40px/.test(css),
+    '.stamper-btn must have width: 40px'
+  );
+  assert.ok(
+    /\.stamper-btn\s*\{[\s\S]*?height:\s*40px/.test(css),
+    '.stamper-btn must have height: 40px'
+  );
+  assert.ok(
+    /\.stamper-btn\s*\{[\s\S]*?border-radius:\s*50%/.test(css),
+    '.stamper-btn must have border-radius: 50%'
+  );
+  assert.ok(
+    /\.stamper-btn\s*\{[\s\S]*?display:\s*flex/.test(css),
+    '.stamper-btn must use display: flex'
+  );
+  assert.ok(
+    /\.stamper-btn\s*\{[\s\S]*?align-items:\s*center/.test(css),
+    '.stamper-btn must center vertically with align-items: center'
+  );
+  assert.ok(
+    /\.stamper-btn\s*\{[\s\S]*?justify-content:\s*center/.test(css),
+    '.stamper-btn must center horizontally with justify-content: center'
+  );
+
+  // Verify close button centering and round shape
+  assert.ok(
+    /\.stamper-close-btn\s*\{[\s\S]*?display:\s*flex/.test(css),
+    '.stamper-close-btn must use display: flex'
+  );
+  assert.ok(
+    /\.stamper-close-btn\s*\{[\s\S]*?align-items:\s*center/.test(css),
+    '.stamper-close-btn must center vertically'
+  );
+  assert.ok(
+    /\.stamper-close-btn\s*\{[\s\S]*?justify-content:\s*center/.test(css),
+    '.stamper-close-btn must center horizontally'
+  );
+});
+
