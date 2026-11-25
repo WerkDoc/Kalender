@@ -211,17 +211,17 @@
   </main>
 
   <!-- Shift Stamper Floating Bar (Rapid shift entry rota) -->
-  <aside class="shift-stamper-bar" id="shiftStamperBar">
+  <aside class="shift-stamper-bar" id="shiftStamperBar" aria-label="Schicht-Schnellstempel">
     <span class="stamper-label">Stempel:</span>
     <div class="stamper-chips">
-      <button class="stamper-btn selected" data-shift="frueh" style="color: var(--shift-frueh-text);">☀️ F</button>
-      <button class="stamper-btn" data-shift="spaet" style="color: var(--shift-spaet-text);">🌅 S</button>
-      <button class="stamper-btn" data-shift="nacht" style="color: var(--shift-nacht-text);">🌙 N</button>
-      <button class="stamper-btn" data-shift="urlaub" style="color: var(--shift-urlaub-text);">🌴 U</button>
-      <button class="stamper-btn" data-shift="frei" style="color: var(--shift-frei-text);">☕ Frei</button>
-      <button class="stamper-btn" data-shift="delete" title="Schicht löschen">❌</button>
+      <button class="stamper-btn selected" data-shift="frueh" title="Frühschicht (F)">☀️ F</button>
+      <button class="stamper-btn" data-shift="spaet" title="Spätschicht (S)">🌅 S</button>
+      <button class="stamper-btn" data-shift="nacht" title="Nachtschicht (N)">🌙 N</button>
+      <button class="stamper-btn" data-shift="urlaub" title="Urlaub (U)">🌴 U</button>
+      <button class="stamper-btn" data-shift="frei" title="Schichtfrei (Frei)">☕ Frei</button>
+      <button class="stamper-btn" data-shift="delete" title="Schicht löschen (X)">❌</button>
     </div>
-    <button class="glass-btn glass-btn-icon glass-btn-sm" id="stamperCloseBtn" title="Stempelmodus beenden" style="margin-left: 4px;">✕</button>
+    <button class="stamper-close-btn" id="stamperCloseBtn" title="Stempelmodus beenden" aria-label="Stempelmodus beenden">✕</button>
   </aside>
 
   <!-- Bottom Mobile Navigation Bar -->
